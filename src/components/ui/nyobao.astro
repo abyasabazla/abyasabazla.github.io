@@ -1,0 +1,101 @@
+import { render, type CollectionEntry } from 'astro:content';
+import Carousel from 'astro-carousel';
+import { Image } from 'astro:assets';
+
+interface Props {
+  entry: CollectionEntry<'edu'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+// Local images definition
+const images = [
+  {
+    src: "./src/assets/image1.jpg",
+    alt: "Image 1 description",
+  },
+  {
+    src: "./src/assets/image2.jpg",
+    alt: "Image 2 description",
+  },
+  // Add as necessary
+];
+
+---
+
+<li class="py-0.5">
+  <div class="flex gap-5">
+    <div class="relative min-w-28 shrink-0">
+      <span class="text-muted-foreground text-sm">{entry.data.from} - {entry.data.to}</span>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col">
+        <span class="text-headings font-medium">{entry.data.title}</span>
+        <span class="text-foreground text-sm">{entry.data.company}</span>
+      </div>
+      <div class="prose dark:prose-invert prose-sm">
+        <Content />
+      </div>
+      {/* Carousel component */}
+      <Carousel images={images} />
+      <div>
+        <img
+          src='./src/content/education/idn.png'
+          alt={'Education'}
+          class="education"
+        />
+      </div>
+      <ul id="carouselTargetList">
+      {
+        images.map((img, index) => (
+          <li key={index}>
+            <a href={`/?image=${index}`} data-carousel-index={index}>
+              <img src={img.src} alt={img.alt} />
+            </a>
+          </li>
+        ))
+      }
+      </ul>
+    </div>
+  </div>
+</li>
+
+
+
+
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+
+interface Props {
+  entry: CollectionEntry<'edu'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<li class="py-0.5">
+  <div class="flex gap-5">
+    <div class="relative min-w-28 shrink-0">
+      <span class="text-muted-foreground text-sm">{entry.data.from} - {entry.data.to}</span>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col">
+        <span class="text-headings font-medium">{entry.data.title}</span>
+        <span class="text-foreground text-sm">{entry.data.company}</span>
+      </div>
+      <div class="prose dark:prose-invert prose-sm">
+        <Content />
+      </div>
+      <div>
+      <img
+        src='./src/content/education/idn.png'
+        alt={'Education'}
+        class="education"
+      />
+      </div>
+    </div>
+  </div>
+</li>

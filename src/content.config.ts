@@ -45,6 +45,12 @@ const jobCollection = defineCollection({
     from: z.number(),
     to: z.number().or(z.enum(['Now'])),
     url: z.string(),
+    images: z.array(
+      z.object({
+        src: z.string(), // Gunakan string untuk URL
+        alt: z.string().optional(),
+      })
+    ).optional(),
   }),
 });
 
@@ -56,6 +62,29 @@ const talkCollection = defineCollection({
     event: z.string(),
     location: z.string(),
     url: z.string(),
+    images: z.array(
+      z.object({
+        src: z.string(), // Gunakan string untuk URL
+        alt: z.string().optional(),
+      })
+    ).optional(),
+  }),
+});
+
+const awardCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/awards' }),
+  schema: z.object({
+    title: z.string(),
+    year: z.number(),
+    event: z.string(),
+    location: z.string(),
+    url: z.string(),
+    images: z.array(
+      z.object({
+        src: z.string(), // Gunakan string untuk URL
+        alt: z.string().optional(),
+      })
+    ).optional(),
   }),
 });
 
@@ -68,6 +97,12 @@ const eduCollection = defineCollection({
     from: z.number(),
     to: z.number().or(z.enum(['Now'])),
     url: z.string(),
+    images: z.array(
+      z.object({
+        src: z.string(), // Gunakan string untuk URL
+        alt: z.string().optional(),
+      })
+    ).optional(),
   }),
 });
 
@@ -86,6 +121,7 @@ export const collections = {
   links: linkCollection,
   jobs: jobCollection,
   talks: talkCollection,
+  awards: awardCollection,
   edu: eduCollection,
   posts: postCollection,
 };

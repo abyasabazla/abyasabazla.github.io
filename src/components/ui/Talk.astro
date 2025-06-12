@@ -7,6 +7,9 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+
+// Generate unique ID untuk lightbox
+const lightboxId = `lightbox-${entry.id}`;
 ---
 
 <li class="py-0.5">
@@ -14,14 +17,195 @@ const { Content } = await render(entry);
     <div class="relative min-w-28 shrink-0">
       <span class="text-muted-foreground text-sm">{entry.data.year}</span>
     </div>
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-3 w-full">
       <div class="flex flex-col">
         <span class="text-headings font-medium">{entry.data.title}</span>
         <span class="text-foreground text-sm">{entry.data.event}, {entry.data.location}</span>
       </div>
-      <div class="prose dark:prose-invert prose-sm">
-        <Content />
-      </div>
+      
+      {entry.body && (
+        <div class="prose dark:prose-invert prose-sm">
+          <Content />
+        </div>
+      )}
+      
+      {entry.data.images && entry.data.images.length > 0 && (
+        <div class="mt-3">
+          <div class="flex gap-3 overflow-x-auto pb-3 scrollbar-thin">
+            {entry.data.images.map((image, index) => (
+              <button 
+                class="lightbox-trigger shrink-0 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 transition-transform hover:scale-[1.02] focus:outline-none"
+                data-lightbox={lightboxId}
+                data-src={image.src}
+                data-alt={image.alt || `${entry.data.title} presentation`}
+                data-index={index}
+              >
+                <img
+                  src={image.src}
+                  alt={image.alt || `${entry.data.title} presentation`}
+                  width="160"
+                  height="90"
+                  class="object-cover h-[90px] w-[160px]"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   </div>
 </li>
+
+<!-- Lightbox Modal -->
+<div id={lightboxId} class="lightbox fixed inset-0 bg-gray bg-opacity-50 z-50 hidden items-center justify-center p-4">
+  <div class="max-w-4xl w-full max-h-full overflow-auto">
+    <button class="close-lightbox absolute top-4 left-4 text-white text-4xl z-50" aria-label="Close lightbox">&times;</button>
+    
+    <div class="lightbox-content relative">
+      <img 
+        id={`${lightboxId}-image`} 
+        src="" 
+        alt="" 
+        class="w-full h-auto"
+      />
+      
+      <div class="lightbox-caption text-white text-center mt-2 text-sm"></div>
+    </div>
+    
+
+  </div>
+</div>
+
+<style>
+  .lightbox {
+    transition: opacity 0.3s ease;
+  }
+  
+  .lightbox-content {
+    transition: transform 0.3s ease;
+  }
+</style>
+
+<script>
+  // Inisialisasi lightbox
+  document.addEventListener('DOMContentLoaded', () => {
+    const lightboxTriggers = document.querySelectorAll('.lightbox-trigger');
+    const closeButtons = document.querySelectorAll('.close-lightbox');
+    
+    lightboxTriggers.forEach(trigger => {
+      trigger.addEventListener('click', function() {
+        const lightboxId = this.dataset.lightbox;
+        const lightbox = document.getElementById(lightboxId);
+        const imageSrc = this.dataset.src;
+        const altText = this.dataset.alt;
+        const index = parseInt(this.dataset.index);
+        
+        // Set image
+        const lightboxImage = lightbox.querySelector('.lightbox-content img');
+        lightboxImage.src = imageSrc;
+        lightboxImage.alt = altText;
+        
+        // Set caption
+        const caption = lightbox.querySelector('.lightbox-caption');
+        caption.textContent = altText;
+        
+        // Set active index
+        lightbox.dataset.activeIndex = index;
+        
+        // Show lightbox
+        lightbox.classList.remove('hidden');
+        lightbox.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+      });
+    });
+    
+    closeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const lightbox = this.closest('.lightbox');
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+      });
+    });
+    
+    // Close lightbox when clicking on backdrop
+    document.querySelectorAll('.lightbox').forEach(lightbox => {
+      lightbox.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.add('hidden');
+          this.classList.remove('flex');
+          document.body.classList.remove('overflow-hidden');
+        }
+      });
+    });
+    
+    // Navigation buttons
+    document.querySelectorAll('.lightbox-prev').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const lightbox = this.closest('.lightbox');
+        const currentIndex = parseInt(lightbox.dataset.activeIndex);
+        const totalImages = lightbox.dataset.totalImages;
+        const prevIndex = (currentIndex - 1 + totalImages) % totalImages;
+        
+        navigateLightbox(lightbox, prevIndex);
+      });
+    });
+    
+    document.querySelectorAll('.lightbox-next').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const lightbox = this.closest('.lightbox');
+        const currentIndex = parseInt(lightbox.dataset.activeIndex);
+        const totalImages = lightbox.dataset.totalImages;
+        const nextIndex = (currentIndex + 1) % totalImages;
+        
+        navigateLightbox(lightbox, nextIndex);
+      });
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const visibleLightbox = document.querySelector('.lightbox:not(.hidden)');
+      if (!visibleLightbox) return;
+      
+      const currentIndex = parseInt(visibleLightbox.dataset.activeIndex);
+      const totalImages = visibleLightbox.dataset.totalImages;
+      
+      if (e.key === 'Escape') {
+        visibleLightbox.classList.add('hidden');
+        visibleLightbox.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+      } else if (e.key === 'ArrowLeft') {
+        const prevIndex = (currentIndex - 1 + totalImages) % totalImages;
+        navigateLightbox(visibleLightbox, prevIndex);
+      } else if (e.key === 'ArrowRight') {
+        const nextIndex = (currentIndex + 1) % totalImages;
+        navigateLightbox(visibleLightbox, nextIndex);
+      }
+    });
+    
+    function navigateLightbox(lightbox, newIndex) {
+      const triggers = document.querySelectorAll(`.lightbox-trigger[data-lightbox="${lightbox.id}"]`);
+      const trigger = Array.from(triggers)[newIndex];
+      
+      if (trigger) {
+        const imageSrc = trigger.dataset.src;
+        const altText = trigger.dataset.alt;
+        
+        // Update image
+        const lightboxImage = lightbox.querySelector('.lightbox-content img');
+        lightboxImage.src = imageSrc;
+        lightboxImage.alt = altText;
+        
+        // Update caption
+        const caption = lightbox.querySelector('.lightbox-caption');
+        caption.textContent = altText;
+        
+        // Update active index
+        lightbox.dataset.activeIndex = newIndex;
+      }
+    }
+  });
+</script>

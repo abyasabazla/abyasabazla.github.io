@@ -25,6 +25,50 @@
   --palette-950: oklch(0.25 0.003 107.8);        /* #0a0a0a */
 }
 
+/* Lightbox styling */
+.lightbox {
+  backdrop-filter: blur(5px);
+}
+
+.lightbox-content {
+  animation: lightboxFade 0.3s ease-out;
+}
+
+@keyframes lightboxFade {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.close-lightbox {
+  transition: transform 0.2s ease;
+}
+
+.close-lightbox:hover {
+  transform: scale(1.2);
+}
+
+.lightbox-prev, .lightbox-next {
+  transition: background-color 0.2s ease;
+}
+
+.lightbox-prev:hover, .lightbox-next:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Scrollbar styling */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
 .dark {
   --palette-base: #000;
   --palette-50: oklch(0.25 0.003 107.8);          /* #0a0a0a */

@@ -7,6 +7,7 @@ import { DEFAULT_CONFIGURATION } from '@/lib/constants';
 import WorkExperience from '@/components/ui/WorkExperience.astro';
 import Educ from '@/components/ui/Education.astro';
 import Talk from '@/components/ui/Talk.astro';
+import Award from '@/components/ui/Award.astro';
 import { sortJobsByDate } from '@/lib/utils';
 import Carousel from 'astro-carousel';  
 
@@ -17,6 +18,7 @@ const links = await getCollection('links');
 const jobs = await getCollection('jobs');
 const sortedJobs = sortJobsByDate(jobs);
 const talks = await getCollection('talks');
+const awards = await getCollection('awards');
 const edu = await getCollection('edu');
 ---
 
@@ -67,20 +69,6 @@ const edu = await getCollection('edu');
     )
   }
   
-  {
-    sortedJobs.length > 0 && (
-      <Container as='section' class='py-6'>
-        <div class="flex flex-col gap-5">
-          <span class="text-headings">Work Experience</span>
-          <ul class="flex flex-col gap-8">
-            {sortedJobs.map((job) => (
-              <WorkExperience entry={job} />
-            ))}
-          </ul>
-        </div>
-      </Container>
-    )
-  }
 
   {
     talks.length > 0 && (
@@ -96,6 +84,37 @@ const edu = await getCollection('edu');
       </Container>
     )
   }
+
+  {
+    awards.length > 0 && (
+      <Container as='section' class='py-6'>
+        <div class="flex flex-col gap-5">
+          <span class="text-headings">Awards</span>
+          <ul class="flex flex-col gap-8">
+            {awards.map((awards) => (
+              <Award entry={awards} />
+            ))}
+          </ul>
+        </div>
+      </Container>
+    )
+  }
+
+  {
+    sortedJobs.length > 0 && (
+      <Container as='section' class='py-6'>
+        <div class="flex flex-col gap-5">
+          <span class="text-headings">Volunteering</span>
+          <ul class="flex flex-col gap-8">
+            {sortedJobs.map((job) => (
+              <WorkExperience entry={job} />
+            ))}
+          </ul>
+        </div>
+      </Container>
+    )
+  }
+
 
   {
     edu.length > 0 && (
